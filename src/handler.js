@@ -78,8 +78,15 @@ function selectFewerProps(show){
   return {id, name, publisher};
 }
 
-const getAllBooksHandler = () =>  {
-  const book = books.map(selectFewerProps);
+const getAllBooksHandler = (request, h) =>  {
+  const { name, reading, finished} = request.query;
+  var book = books;
+
+  if(name) book = book.filter( h => h.name.toLowerCase().includes(name.toLowerCase()) );
+  if(reading) book = book.filter( h => h.reading === (reading == 1));
+  if(finished) book = book.filter( h => h.finished === (finished == 1));
+  
+  book = book.map(selectFewerProps);
 
   if (book !== undefined) {
       return {
@@ -118,29 +125,6 @@ const getBookByIdHandler = (request, h) => {
     });
     response.code(404);
     return response;
-};
-  
-const getBookByNameHandler = (request, h) => {
-  const { name } = request.query;
-  // console.log(name);
-  const book = books.filter( h => h.name.includes(name) );
-  // const book = books.filter((n) => n.name === name)[0];
-
-  if (book !== undefined) {
-      return {
-      status: 'success',
-      data: {
-          book,
-      },
-      };
-  }
-
-  const response = h.response({
-      status: 'fail',
-      message: 'Buku tidak ditemukan',
-  });
-  response.code(404);
-  return response;
 };
 
 const editBookByIdHandler = (request, h) => {
@@ -236,7 +220,6 @@ module.exports = {
     addBookHandler,
     getAllBooksHandler,
     getBookByIdHandler,
-    getBookByNameHandler,
     editBookByIdHandler,
     deleteBookByIdHandler
   };
